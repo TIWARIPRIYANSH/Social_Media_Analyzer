@@ -1,0 +1,7 @@
+My approach was to build a robust, scalable, and user-friendly full-stack application by decoupling the frontend and backend. This separation of concerns allows for independent development, deployment, and scaling.
+
+For the backend, I chose a Node.js and Express stack, structured using an MVC architecture. By separating logic into distinct controllers and routes, this pattern creates a clear separation of concerns, making the codebase highly readable, scalable, and easy to debug. File uploads are securely handled by Multer, which enforces a 5MB size limit, while pdf-parse and Tesseract.js provide versatile text extraction.
+
+The core feature is a two-tiered analysis system that provides instant, rule-based feedback and integrates Google's Generative AI for deeper, strategic advice.
+
+On the frontend, the UI was built as a component-based architecture within Next.js. Breaking the interface into small, reusable components (e.g., for file uploads, results, and suggestions) makes the code more readable, promotes reuse, and simplifies future scaling. To enhance the user experience, I added a side-by-side results view, a progress bar, and subtle animations using Framer Motion. Finally, CORS was carefully configured to ensure secure communication between the deployed services.
