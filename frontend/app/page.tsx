@@ -1,6 +1,9 @@
+
+
 "use client";
 import React, { useState } from 'react';
 import axios from 'axios';
+
 
 import Header from '../components/Header';
 import FileUpload from '../components/FileUpload';
@@ -8,15 +11,16 @@ import ProgressBar from '../components/ProgressBar';
 import ResultsDisplay from '../components/ResultsDisplay';
 import Suggestions from '../components/Suggestions';
 
+const API_BASE_URL = 'https://social-media-analyzer-45wb.onrender.com'; 
 
 type Suggestion = {
     type: string;
     text: string;
 };
 
-// --- Main Page Component ---
+
 export default function HomePage() {
-    // --- State Management ---
+
     const [extractedText, setExtractedText] = useState<string>("");
     const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
     const [aiSuggestions, setAiSuggestions] = useState<string>("");
@@ -27,7 +31,6 @@ export default function HomePage() {
 
     const [uploadProgress, setUploadProgress] = useState<number>(0);
     const [fileType, setFileType] = useState<string>("");
-
 
     const resetState = () => {
         setExtractedText("");
@@ -40,10 +43,10 @@ export default function HomePage() {
         setFileType("");
     };
 
-    
+   
     const getRuleSuggestions = async (text: string) => {
         try {
-            const res = await axios.post('http://localhost:3001/api/analyze/suggestions', { text });
+            const res = await axios.post(`${API_BASE_URL}/api/analyze/suggestions`, { text });
             setSuggestions(res.data.suggestions || []);
         } catch (err) {
             console.error("Failed to get rule-based suggestions:", err);
@@ -53,7 +56,7 @@ export default function HomePage() {
     const getAiSuggestions = async (text: string) => {
         setIsAnalyzing(true);
         try {
-            const res = await axios.post('http://localhost:3001/api/analyze/ai-suggestions', { text });
+            const res = await axios.post(`${API_BASE_URL}/api/analyze/ai-suggestions`, { text });
             setAiSuggestions(res.data.suggestions || "No AI suggestions were generated.");
         } catch (err: any) {
             console.error("Failed to get AI suggestions:", err);
@@ -64,7 +67,6 @@ export default function HomePage() {
     };
 
 
-  
     const handleFile = async (file: File) => {
         if (!file) return;
         
@@ -84,7 +86,7 @@ export default function HomePage() {
         formData.append("file", file);
 
         try {
-            const res = await axios.post(`http://localhost:3001/api/extract/${endpoint}`, formData, {
+            const res = await axios.post(`${API_BASE_URL}/api/extract/${endpoint}`, formData, {
                 onUploadProgress: (progressEvent) => {
                     const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total ?? 1));
                     setUploadProgress(percentCompleted);
@@ -108,25 +110,22 @@ export default function HomePage() {
         }
     };
 
-    // --- Render Method ---
+
     return (
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 flex flex-col items-center justify-center p-4 font-sans">
             <main className="w-full max-w-6xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-10 space-y-6 transform transition-all flex flex-col flex-grow">
                 <Header />
                 
-                {/* --- Conditionally render upload or results view --- */}
                 {!extractedText ? (
-                    <div className="flex flex-col items-center justify-center flex-grow mb-2">
+                    <div className="flex flex-col items-center justify-center flex-grow">
                         <FileUpload onFile={handleFile} disabled={isLoading || isAnalyzing} />
                         {isLoading && <div className="w-full max-w-2xl mt-4"><ProgressBar progress={uploadProgress} fileType={fileType} /></div>}
                     </div>
                 ) : (
                     <div className="flex-grow grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        {/* Left Column: Extracted Text */}
                         <div className="w-full">
                             <ResultsDisplay text={extractedText} onReset={resetState} />
                         </div>
-                        {/* Right Column: Suggestions */}
                         <div className="w-full">
                            <Suggestions 
                                 ruleSuggestions={suggestions} 
@@ -146,4 +145,3 @@ export default function HomePage() {
         </div>
     );
 }
-
