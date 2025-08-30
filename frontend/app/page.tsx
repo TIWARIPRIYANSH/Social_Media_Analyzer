@@ -45,7 +45,7 @@ export default function HomePage() {
 
     const getRuleSuggestions = async (text: string) => {
         try {
-            const res = await axios.post(`${API_BASE_URL}/analyze/suggestions`, { text });
+            const res = await axios.post(`${API_BASE_URL}/api/analyze/suggestions`, { text });
             setSuggestions(res.data.suggestions || []);
         } catch (err) {
             console.error("Failed to get rule-based suggestions:", err);
@@ -55,7 +55,7 @@ export default function HomePage() {
     const getAiSuggestions = async (text: string) => {
         setIsAnalyzing(true);
         try {
-            const res = await axios.post(`${API_BASE_URL}/analyze/ai-suggestions`, { text });
+            const res = await axios.post(`${API_BASE_URL}/api/analyze/ai-suggestions`, { text });
             setAiSuggestions(res.data.suggestions || "No AI suggestions were generated.");
         } catch (err) {
             console.error("Failed to get AI suggestions:", err);
@@ -90,7 +90,7 @@ export default function HomePage() {
         formData.append("file", file);
 
         try {
-            const res = await axios.post(`${API_BASE_URL}/extract/${endpoint}`, formData, {
+            const res = await axios.post(`${API_BASE_URL}/api/extract/${endpoint}`, formData, {
                 onUploadProgress: (progressEvent) => {
                     const total = progressEvent.total ?? file.size;
                     const percentCompleted = Math.round((progressEvent.loaded * 100) / total);
