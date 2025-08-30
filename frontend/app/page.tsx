@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-// --- Component Imports ---
 import Header from '../components/Header';
 import FileUpload from '../components/FileUpload';
 import ProgressBar from '../components/ProgressBar';
@@ -31,7 +30,7 @@ export default function HomePage() {
     const [uploadProgress, setUploadProgress] = useState<number>(0);
     const [fileType, setFileType] = useState<string>("");
 
-    // --- Reset Function ---
+    
     const resetState = () => {
         setExtractedText("");
         setSuggestions([]);
@@ -43,7 +42,7 @@ export default function HomePage() {
         setFileType("");
     };
 
-    // --- API Call Functions ---
+
     const getRuleSuggestions = async (text: string) => {
         try {
             const res = await axios.post(`${API_BASE_URL}/analyze/suggestions`, { text });
@@ -71,7 +70,7 @@ export default function HomePage() {
     };
 
 
-    // --- Main File Handling Logic ---
+
     const handleFile = async (file: File) => {
         if (!file) return;
         
@@ -120,7 +119,7 @@ export default function HomePage() {
         }
     };
 
-    // --- Render Method ---
+  
     return (
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 flex flex-col items-center justify-center p-4 font-sans">
             <main className="w-full max-w-6xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-10 space-y-4 transform transition-all flex flex-col flex-grow">
