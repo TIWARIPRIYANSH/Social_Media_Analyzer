@@ -1,26 +1,25 @@
-
-
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-
+// --- Component Imports ---
 import Header from '../components/Header';
 import FileUpload from '../components/FileUpload';
 import ProgressBar from '../components/ProgressBar';
 import ResultsDisplay from '../components/ResultsDisplay';
 import Suggestions from '../components/Suggestions';
 
-const API_BASE_URL = 'https://social-media-analyzer-45wb.onrender.com'; 
 
 type Suggestion = {
     type: string;
     text: string;
 };
 
+const API_BASE_URL = 'https://social-media-analyzer-45wb.onrender.com'; 
+
 
 export default function HomePage() {
-
+    
     const [extractedText, setExtractedText] = useState<string>("");
     const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
     const [aiSuggestions, setAiSuggestions] = useState<string>("");
@@ -32,6 +31,7 @@ export default function HomePage() {
     const [uploadProgress, setUploadProgress] = useState<number>(0);
     const [fileType, setFileType] = useState<string>("");
 
+    // --- Reset Function ---
     const resetState = () => {
         setExtractedText("");
         setSuggestions([]);
@@ -43,10 +43,10 @@ export default function HomePage() {
         setFileType("");
     };
 
-   
+    // --- API Call Functions ---
     const getRuleSuggestions = async (text: string) => {
         try {
-            const res = await axios.post(`${API_BASE_URL}/api/analyze/suggestions`, { text });
+            const res = await axios.post(`${API_BASE_URL}/analyze/suggestions`, { text });
             setSuggestions(res.data.suggestions || []);
         } catch (err) {
             console.error("Failed to get rule-based suggestions:", err);
@@ -56,17 +56,22 @@ export default function HomePage() {
     const getAiSuggestions = async (text: string) => {
         setIsAnalyzing(true);
         try {
-            const res = await axios.post(`${API_BASE_URL}/api/analyze/ai-suggestions`, { text });
+            const res = await axios.post(`${API_BASE_URL}/analyze/ai-suggestions`, { text });
             setAiSuggestions(res.data.suggestions || "No AI suggestions were generated.");
-        } catch (err: any) {
+        } catch (err) {
             console.error("Failed to get AI suggestions:", err);
-            setError(err.response?.data?.error || "Failed to get AI analysis.");
+            if (axios.isAxiosError(err)) {
+                setError(err.response?.data?.error || "Failed to get AI analysis.");
+            } else {
+                setError("An unknown error occurred while getting AI suggestions.");
+            }
         } finally {
             setIsAnalyzing(false);
         }
     };
 
 
+    // --- Main File Handling Logic ---
     const handleFile = async (file: File) => {
         if (!file) return;
         
@@ -86,9 +91,10 @@ export default function HomePage() {
         formData.append("file", file);
 
         try {
-            const res = await axios.post(`${API_BASE_URL}/api/extract/${endpoint}`, formData, {
+            const res = await axios.post(`${API_BASE_URL}/extract/${endpoint}`, formData, {
                 onUploadProgress: (progressEvent) => {
-                    const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total ?? 1));
+                    const total = progressEvent.total ?? file.size;
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / total);
                     setUploadProgress(percentCompleted);
                 }
             });
@@ -102,24 +108,28 @@ export default function HomePage() {
                 setError("Could not extract any text from the document.");
             }
 
-        } catch (err: any) {
+        } catch (err) {
             console.error("File processing failed:", err);
-            setError(err.response?.data?.error || "An unexpected error occurred during file processing.");
+             if (axios.isAxiosError(err)) {
+                setError(err.response?.data?.error || "An unexpected error occurred during file processing.");
+            } else {
+                setError("An unknown error occurred during file processing.");
+            }
         } finally {
             setIsLoading(false);
         }
     };
 
-
+    // --- Render Method ---
     return (
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 flex flex-col items-center justify-center p-4 font-sans">
-            <main className="w-full max-w-6xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-10 space-y-6 transform transition-all flex flex-col flex-grow">
+            <main className="w-full max-w-6xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-10 space-y-4 transform transition-all flex flex-col flex-grow">
                 <Header />
                 
                 {!extractedText ? (
                     <div className="flex flex-col items-center justify-center flex-grow">
                         <FileUpload onFile={handleFile} disabled={isLoading || isAnalyzing} />
-                        {isLoading && <div className="w-full max-w-2xl mt-4"><ProgressBar progress={uploadProgress} fileType={fileType} /></div>}
+                        {isLoading && <div className="w-full max-w-md mt-4"><ProgressBar progress={uploadProgress} fileType={fileType} /></div>}
                     </div>
                 ) : (
                     <div className="flex-grow grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -145,3 +155,4 @@ export default function HomePage() {
         </div>
     );
 }
+
